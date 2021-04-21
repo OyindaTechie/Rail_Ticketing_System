@@ -21,4 +21,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('phonelogin', 'LoginController@Login');
 Route::post('posttransaction', 'createTransaction@posttransaction');
+Route::post('register', 'RegistrationController@Register');
+
+Route::get('send', 'NotifyController@index');
+
+/* Route::get('mail', function () {
+    $user = App\Registration::find(1);
+
+    return (new App\Notifications\AlertUsers($user))
+                ->toMail($user->email);
+}); */
 
