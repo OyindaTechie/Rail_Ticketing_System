@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Notifications\AlertUsers;
+use App\Registration;
+use App\Services\paystackApi;
 use App\transaction;
 use App\verify_ticket;
 use Illuminate\Http\Request;
@@ -10,6 +13,20 @@ class createTransaction extends Controller
 {
     //
     public function posttransaction(Request $request){
+
+        $entries = paystackApi::paymentConfirmationverify($request->ref);
+
+        
+        if(!$entries['data']['status']) {
+
+
+          return  "transaction not found";
+        }
+
+        // return $entries;
+
+
+       
 
         // Available alpha caracters
 $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -24,7 +41,7 @@ $strng = str_shuffle($pin);
 
 
      $posttransact = new transaction();
-     
+
      $posttransact->transaction_id = $strng;
      $posttransact->source = $request->source;
      $posttransact->destination = $request->destination;
@@ -43,7 +60,11 @@ $strng = str_shuffle($pin);
 
      $verify_ticket->save(); 
 
- 
+     $find_user = Registration::where('phone_number',$request->phone_number)->first();
+
+       // return $find_user;
+
+        $find_user->notify(new AlertUsers($verify_ticket->ticket_id,$find_user->email, $request->destination,$request->source));
      return response()->json([
          "message" => "transaction record created"
      ], 201);
